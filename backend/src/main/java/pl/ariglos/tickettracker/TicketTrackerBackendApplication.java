@@ -1,4 +1,4 @@
-package com.example.tickettracker;
+package pl.ariglos.tickettracker;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

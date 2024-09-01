@@ -43,7 +43,7 @@ public class Ticket {
     private String customOffence;
 
     @ManyToOne()
-    @JoinColumn(name = "offence_id")
+    @JoinColumn(name = "offenceId")
     private Offence offence;
 
     @ManyToOne()

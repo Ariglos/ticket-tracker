@@ -1,8 +1,7 @@
 package pl.ariglos.tickettracker.tickets.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import pl.ariglos.tickettracker.employees.domain.Employee;
 import pl.ariglos.tickettracker.tickets.enumerations.Currency;
 import pl.ariglos.tickettracker.tickets.enumerations.TicketStatus;
@@ -12,11 +11,14 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "ticket")
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class Ticket {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(unique = true)
@@ -43,10 +45,14 @@ public class Ticket {
     private String customOffence;
 
     @ManyToOne()
-    @JoinColumn(name = "offenceId")
+    @JoinColumn(name = "offence_id")
     private Offence offence;
 
     @ManyToOne()
     @JoinColumn(name = "employee_id")
     private Employee employee;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "attachment_id")
+    private Attachment attachment;
 }

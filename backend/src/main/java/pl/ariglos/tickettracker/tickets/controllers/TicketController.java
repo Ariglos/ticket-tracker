@@ -2,12 +2,10 @@ package pl.ariglos.tickettracker.tickets.controllers;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pl.ariglos.tickettracker.common.api.exceptions.TicketTrackerException;
 import pl.ariglos.tickettracker.tickets.dto.TicketDto;
+import pl.ariglos.tickettracker.tickets.dto.CreateTicketItem;
 import pl.ariglos.tickettracker.tickets.queries.BrowseTickets;
 import pl.ariglos.tickettracker.tickets.services.TicketService;
 
@@ -34,4 +32,12 @@ public class TicketController {
 
         return ResponseEntity.ok(ticket);
     }
+
+    @PostMapping()
+    public ResponseEntity<?> createTicket(@RequestBody CreateTicketItem createTicketItem) throws TicketTrackerException {
+        TicketDto ticket = ticketService.createTicket(createTicketItem);
+
+        return ResponseEntity.ok(ticket);
+    }
+
 }

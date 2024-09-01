@@ -5,5 +5,11 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import pl.ariglos.tickettracker.tickets.domain.Ticket;
 
+import java.util.Optional;
+
 @Repository
-public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecificationExecutor<Ticket> {}
+public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecificationExecutor<Ticket> {
+
+    Optional<Ticket> findBySignature(String signature);
+
+}

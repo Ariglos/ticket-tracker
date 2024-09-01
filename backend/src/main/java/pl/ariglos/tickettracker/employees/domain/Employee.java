@@ -11,7 +11,7 @@ import pl.ariglos.tickettracker.employees.enumerations.EmployeeStatus;
 @Setter
 public class Employee {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(nullable = false)

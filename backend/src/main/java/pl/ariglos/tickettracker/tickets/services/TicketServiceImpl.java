@@ -17,6 +17,7 @@ import pl.ariglos.tickettracker.tickets.domain.Offence;
 import pl.ariglos.tickettracker.tickets.domain.Ticket;
 import pl.ariglos.tickettracker.tickets.dto.AttachmentDto;
 import pl.ariglos.tickettracker.tickets.dto.CreateTicketItem;
+import pl.ariglos.tickettracker.tickets.dto.ModifyTicketItem;
 import pl.ariglos.tickettracker.tickets.dto.TicketDto;
 import pl.ariglos.tickettracker.tickets.enumerations.TicketStatus;
 import pl.ariglos.tickettracker.tickets.queries.BrowseTickets;
@@ -50,7 +51,6 @@ public class TicketServiceImpl implements TicketService {
 
   @Override
   public Page<TicketDto> browseTickets(BrowseTickets query) throws TicketTrackerException {
-
     Page<TicketDto> ticketDtos;
 
     try {
@@ -87,35 +87,62 @@ public class TicketServiceImpl implements TicketService {
   }
 
   @Override
-  public TicketDto createTicket(CreateTicketItem createItem) throws TicketTrackerException {
+  public TicketDto createTicket(CreateTicketItem createTicketItem) throws TicketTrackerException {
+    TicketDto savedTicketDto;
+
+    verifyIfSignatureIsUnique(createTicketItem.getSignature());
+
+    Offence offence = findOffenceById(createTicketItem.getOffenceId());
+    Employee employee = findEmployeeById(createTicketItem.getEmployeeId());
+    Ticket ticket = convertToCrateEntity(createTicketItem, offence, employee);
+
     try {
-      validateTicket(createItem);
-
-      Optional<Offence> optionalOffence = offenceRepository.findById(createItem.getOffenceId());
-      if (optionalOffence.isEmpty()) {
-        String errorCode = "EXC_008";
-        String message = languageController.get(errorCode);
-        throw new TicketTrackerException(errorCode, message);
-      }
-
-      Optional<Employee> optionalEmployee = employeeRepository.findById(createItem.getEmployeeId());
-      if (optionalEmployee.isEmpty()) {
-        String errorCode = "EXC_009";
-        String message = languageController.get(errorCode);
-        throw new TicketTrackerException(errorCode, message);
-      }
-
-      Ticket ticket =
-          convertToCrateEntity(createItem, optionalOffence.get(), optionalEmployee.get());
-
       Ticket savedTicket = ticketRepository.save(ticket);
-
-      return conversionService.convert(savedTicket, TicketDto.class);
+      savedTicketDto = conversionService.convert(savedTicket, TicketDto.class);
     } catch (DataAccessException e) {
       String errorCode = "EXC_010";
       String message = languageController.get(errorCode);
       throw new TicketTrackerException(errorCode, message);
     }
+
+    return savedTicketDto;
+  }
+
+  @Override
+  public TicketDto modifyTicket(Long id, ModifyTicketItem modifyTicketItem)
+      throws TicketTrackerException {
+    TicketDto modifiedTicketDto;
+
+    Ticket ticketById = retrieveTicketById(id);
+
+    if (!modifyTicketItem.getSignature().equals(ticketById.getSignature())) {
+      verifyIfSignatureIsUnique(modifyTicketItem.getSignature());
+    }
+
+    Offence offence = findOffenceById(modifyTicketItem.getOffenceId());
+    Employee employee = findEmployeeById(modifyTicketItem.getEmployeeId());
+
+    Ticket ticketToModify = ticketById.toBuilder()
+            .signature(modifyTicketItem.getSignature())
+            .fineAmount(modifyTicketItem.getFineAmount())
+            .currency(modifyTicketItem.getCurrency())
+            .offenceDate(modifyTicketItem.getOffenceDate())
+            .dueDate(modifyTicketItem.getDueDate())
+            .customOffence(modifyTicketItem.getCustomOffence())
+            .offence(offence)
+            .employee(employee)
+            .build();
+
+    try {
+      Ticket modifiedTicket = ticketRepository.save(ticketToModify);
+      modifiedTicketDto = conversionService.convert(modifiedTicket, TicketDto.class);
+    } catch (DataAccessException e) {
+      String errorCode = "EXC_011";
+      String message = languageController.get(errorCode);
+      throw new TicketTrackerException(errorCode, message);
+    }
+
+    return modifiedTicketDto;
   }
 
   private Ticket retrieveTicketById(Long id) throws TicketTrackerException {
@@ -136,9 +163,31 @@ public class TicketServiceImpl implements TicketService {
     return optionalTicket.get();
   }
 
-  private void validateTicket(CreateTicketItem ticketItem) throws TicketTrackerException {
-    Optional<Ticket> ticketBySignature =
-        ticketRepository.findBySignature(ticketItem.getSignature());
+  private Employee findEmployeeById(Long id) throws TicketTrackerException {
+    Optional<Employee> optionalEmployee = employeeRepository.findById(id);
+    if (optionalEmployee.isEmpty()) {
+      String errorCode = "EXC_009";
+      String message = languageController.get(errorCode);
+      throw new TicketTrackerException(errorCode, message);
+    }
+
+    return optionalEmployee.get();
+  }
+
+  private Offence findOffenceById(Long id) throws TicketTrackerException {
+    Optional<Offence> optionalOffence = offenceRepository.findById(id);
+    if (optionalOffence.isEmpty()) {
+      String errorCode = "EXC_008";
+      String message = languageController.get(errorCode);
+      throw new TicketTrackerException(errorCode, message);
+    }
+
+    return optionalOffence.get();
+  }
+
+  private void verifyIfSignatureIsUnique(String signature) throws TicketTrackerException {
+    Optional<Ticket> ticketBySignature = ticketRepository.findBySignature(signature);
+
     if (ticketBySignature.isPresent()) {
       String errorCode = "EXC_007";
       String message = languageController.get(errorCode);

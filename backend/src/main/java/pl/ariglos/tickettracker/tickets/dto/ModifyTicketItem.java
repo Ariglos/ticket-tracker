@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Builder
 @Getter
 @Setter
-public class CreateTicketItem {
+public class ModifyTicketItem {
     private String signature;
 
     private BigDecimal fineAmount;
@@ -24,6 +24,4 @@ public class CreateTicketItem {
     private Long offenceId;
 
     private Long employeeId;
-
-    private AttachmentDto attachment;
 }

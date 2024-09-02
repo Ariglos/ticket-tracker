@@ -7,4 +7,6 @@ import pl.ariglos.tickettracker.employees.dto.EmployeeDto;
 public interface EmployeeService {
 
   List<EmployeeDto> getEmployees() throws TicketTrackerException;
+
+
 }

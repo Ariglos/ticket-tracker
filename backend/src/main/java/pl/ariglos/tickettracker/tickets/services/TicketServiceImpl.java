@@ -115,6 +115,12 @@ public class TicketServiceImpl implements TicketService {
 
     Ticket ticketById = retrieveTicketById(id);
 
+    if (ticketById.getStatus().equals(TicketStatus.PAID)) {
+      String errorCode = "EXC_012";
+      String message = languageController.get(errorCode);
+      throw new TicketTrackerException(errorCode, message);
+    }
+
     if (!modifyTicketItem.getSignature().equals(ticketById.getSignature())) {
       verifyIfSignatureIsUnique(modifyTicketItem.getSignature());
     }

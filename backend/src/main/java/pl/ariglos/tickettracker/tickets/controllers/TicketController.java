@@ -64,4 +64,11 @@ public class TicketController {
 
     return ResponseEntity.ok().build();
   }
+
+  @DeleteMapping("/{id}/attachments")
+  public ResponseEntity<?> deleteAttachment(@PathVariable Long id) throws TicketTrackerException {
+    ticketService.deleteAttachment(id);
+
+    return ResponseEntity.ok().build();
+  }
 }

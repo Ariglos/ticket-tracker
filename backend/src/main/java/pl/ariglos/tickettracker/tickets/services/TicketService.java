@@ -20,4 +20,6 @@ public interface TicketService {
   void deleteTicket(Long id) throws TicketTrackerException;
 
   void confirmTicket(Long id) throws TicketTrackerException;
+
+  void deleteAttachment(Long ticketId) throws TicketTrackerException;
 }

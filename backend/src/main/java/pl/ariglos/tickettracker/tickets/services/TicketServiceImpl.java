@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.ariglos.tickettracker.common.api.exceptions.TicketTrackerException;
 import pl.ariglos.tickettracker.common.translations.LanguageController;
 import pl.ariglos.tickettracker.employees.domain.Employee;
@@ -21,6 +22,7 @@ import pl.ariglos.tickettracker.tickets.dto.ModifyTicketItem;
 import pl.ariglos.tickettracker.tickets.dto.TicketDto;
 import pl.ariglos.tickettracker.tickets.enumerations.TicketStatus;
 import pl.ariglos.tickettracker.tickets.queries.BrowseTickets;
+import pl.ariglos.tickettracker.tickets.repositories.AttachmentRepository;
 import pl.ariglos.tickettracker.tickets.repositories.OffenceRepository;
 import pl.ariglos.tickettracker.tickets.repositories.TicketRepository;
 
@@ -31,20 +33,22 @@ public class TicketServiceImpl implements TicketService {
   private final TicketRepository ticketRepository;
   private final EmployeeRepository employeeRepository;
   private final OffenceRepository offenceRepository;
+  private final AttachmentRepository attachmentRepository;
   private final ConversionService conversionService;
   private final LanguageController languageController;
 
   public TicketServiceImpl(
-      TicketSpecificationService ticketSpecificationService,
-      TicketRepository ticketRepository,
-      EmployeeRepository employeeRepository,
-      OffenceRepository offenceRepository,
-      ConversionService conversionService,
-      LanguageController languageController) {
+          TicketSpecificationService ticketSpecificationService,
+          TicketRepository ticketRepository,
+          EmployeeRepository employeeRepository,
+          OffenceRepository offenceRepository,
+          AttachmentRepository attachmentRepository, ConversionService conversionService,
+          LanguageController languageController) {
     this.ticketSpecificationService = ticketSpecificationService;
     this.ticketRepository = ticketRepository;
     this.employeeRepository = employeeRepository;
     this.offenceRepository = offenceRepository;
+    this.attachmentRepository = attachmentRepository;
     this.conversionService = conversionService;
     this.languageController = languageController;
   }
@@ -186,6 +190,31 @@ public class TicketServiceImpl implements TicketService {
       ticketRepository.save(ticketToConfirm);
     } catch (DataAccessException e) {
       String errorCode = "EXC_016";
+      String message = languageController.get(errorCode);
+      throw new TicketTrackerException(errorCode, message);
+    }
+  }
+
+  @Override
+  @Transactional
+  public void deleteAttachment(Long ticketId) throws TicketTrackerException {
+    Ticket ticket = retrieveTicketById(ticketId);
+
+    Attachment attachment = ticket.getAttachment();
+
+    if (attachment == null) {
+      String errorCode = "EXC_018";
+      String message = languageController.get(errorCode);
+      throw new TicketTrackerException(errorCode, message);
+    }
+
+    try {
+      ticket.setAttachment(null);
+      ticketRepository.save(ticket);
+      attachmentRepository.delete(attachment);
+
+    } catch (DataAccessException e) {
+      String errorCode = "EXC_017";
       String message = languageController.get(errorCode);
       throw new TicketTrackerException(errorCode, message);
     }

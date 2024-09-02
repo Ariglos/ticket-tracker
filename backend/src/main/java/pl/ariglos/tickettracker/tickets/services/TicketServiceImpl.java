@@ -151,6 +151,25 @@ public class TicketServiceImpl implements TicketService {
     return modifiedTicketDto;
   }
 
+  @Override
+  public void deleteTicket(Long id) throws TicketTrackerException {
+    Ticket ticketToDelete = retrieveTicketById(id);
+
+    if (ticketToDelete.getStatus().equals(TicketStatus.PAID)) {
+      String errorCode = "EXC_013";
+      String message = languageController.get(errorCode);
+      throw new TicketTrackerException(errorCode, message);
+    }
+
+    try {
+      ticketRepository.delete(ticketToDelete);
+    } catch (DataAccessException e) {
+      String errorCode = "EXC_014";
+      String message = languageController.get(errorCode);
+      throw new TicketTrackerException(errorCode, message);
+    }
+  }
+
   private Ticket retrieveTicketById(Long id) throws TicketTrackerException {
     if (id == null) {
       String errorCode = "EXC_005";

@@ -16,4 +16,6 @@ public interface TicketService {
   TicketDto createTicket(CreateTicketItem createTicketItem) throws TicketTrackerException;
 
   TicketDto modifyTicket(Long id, ModifyTicketItem modifyTicketItem) throws TicketTrackerException;
+
+  void deleteTicket(Long id) throws TicketTrackerException;
 }

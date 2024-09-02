@@ -7,7 +7,7 @@ import {EmployeeModel} from "../models/employee.model";
   providedIn: 'root'
 })
 export class CompanyApiService {
-  private URL = environment.apiUrl + "/employees";
+  private URL = environment.apiUrl + "/companies";
 
   private http = inject(HttpClient);
 

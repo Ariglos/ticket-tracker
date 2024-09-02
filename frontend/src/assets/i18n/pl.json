@@ -1,0 +1,17 @@
+{
+  "choose.company": "Wybierz spółkę",
+  "ticket.full-name": "Imię i nazwisko",
+  "ticket.name": "Imię",
+  "ticket.surname": "Nazwisko",
+  "ticket.company": "Spółka",
+  "ticket.phone-no": "Nr telefonu",
+  "ticket.signature": "Sygnatura mandatu",
+  "ticket.offence-date": "Data wykroczenia",
+  "ticket.offence": "Przewinienie",
+  "ticket.fine-amount": "Kwota mandatu",
+  "ticket.administration-fee": "Opłata administracyjna",
+  "ticket.due-date": "Termin płatności",
+  "ticket.status": "Status",
+  "ticket.status.PENDING": "Do zapłaty",
+  "ticket.status.PAID": "Opłacony"
+}

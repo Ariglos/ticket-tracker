@@ -1,8 +1,8 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ViewChild, ViewContainerRef} from '@angular/core';
 import {TicketListComponent} from "../components/ticket-list.component";
 import {TicketsApiService} from "../services/tickets.api.service";
 import {DestroyedDirective} from "../../../utils/directives/destroyed.directive";
-import {BehaviorSubject, Observable, switchMap} from "rxjs";
+import {BehaviorSubject, Observable, switchMap, takeUntil} from "rxjs";
 import {TicketModel} from "../models/ticket.model";
 import {PageResult} from "../../../shared/api/page-result";
 import {BrowseTickets} from "../queries/browse-tickets";
@@ -15,8 +15,13 @@ import {OffenceModel} from "../models/offence.model";
 import {OffenceApiService} from "../services/offence-api.service";
 import {ToastModule} from "primeng/toast";
 import {MessageService} from "primeng/api";
-import {TranslateService} from "@ngx-translate/core";
+import {TranslateModule, TranslateService} from "@ngx-translate/core";
 import {Router} from "@angular/router";
+import {Button} from "primeng/button";
+import {DialogModule} from "primeng/dialog";
+import {TicketFormComponent, TicketFormValue} from "../components/ticket-form.component";
+import {CreateTicketRequest} from "../models/create-ticket.request";
+import {ModifyTicketRequest} from "../models/modify-ticket.request";
 
 @Component({
   selector: 'app-tickets.page',
@@ -25,22 +30,49 @@ import {Router} from "@angular/router";
   imports: [
     TicketListComponent,
     AsyncPipe,
-    ToastModule
+    ToastModule,
+    Button,
+    TranslateModule,
+    DialogModule
   ],
   providers: [
     MessageService
   ],
   template: `
     <p-toast/>
+    <p-button
+      severity="success"
+      icon="pi pi-plus"
+      label="{{'ticket.add' | translate}}"
+      (onClick)="openAddTicketDialog()"
+    />
     <app-ticket-list [data]="tickets$ | async" [query]="query" [companies]="companies$ | async"
                      [employees]="employees$ | async" [offences]="offences$ | async" (reloadData)="reloadData($event)"
                      (confirm)="confirmTicket($event)" (delete)="deleteTicket($event)"
                      (deleteAttachment)="deleteAttachment($event)" (displayAttachment)="displayAttachment($event)"
-                     (edit)="editTicket($event)" (navigate)="navigateToTicketDetails($event)"/>
+                     (edit)="openEditTicketDialog($event)" (navigate)="navigateToTicketDetails($event)"/>
+    <p-dialog
+      [(visible)]="displayTicketForm"
+      header="{{'ticket' | translate}}"
+      [style]="{width: '30vw'}"
+      [modal]="true"
+      [draggable]="false"
+      [resizable]="false">
+      <ng-template #ticketForm></ng-template>
+    </p-dialog>
   `,
-  styles: ``
+  styles: `
+    .btn {
+      margin-bottom: 12px;
+    }
+
+  `
 })
 export class TicketsPage implements OnInit {
+
+  @ViewChild('ticketForm', {read: ViewContainerRef})
+  ticketFormContainer: ViewContainerRef;
+
   private service = inject(TicketsApiService);
   private companyService = inject(CompanyApiService);
   private employeeService = inject(EmployeeApiService);
@@ -51,7 +83,7 @@ export class TicketsPage implements OnInit {
 
   private destroyed$ = inject(DestroyedDirective).destroyed$;
 
-  refresh$ = new BehaviorSubject<BrowseTickets>(null);
+  refresh$: BehaviorSubject<BrowseTickets>;
   tickets$: Observable<PageResult<TicketModel>>;
   companies$: Observable<CompanyModel[]>;
   employees$: Observable<EmployeeModel[]>;
@@ -59,8 +91,13 @@ export class TicketsPage implements OnInit {
 
   query: BrowseTickets;
 
+  displayTicketForm: boolean;
+
   ngOnInit(): void {
     this.query = new BrowseTickets();
+    this.query.sortBy = 'id';
+
+    this.refresh$ = new BehaviorSubject<BrowseTickets>(this.query);
 
     this.tickets$ = this.refresh$.pipe(
       switchMap((query) => this.service.browse(query))
@@ -85,7 +122,7 @@ export class TicketsPage implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          detail: this.translateService.instant('ticket.=.confirm.success')
+          detail: this.translateService.instant('ticket.confirm.success')
         });
         this.refreshView();
       },
@@ -138,11 +175,74 @@ export class TicketsPage implements OnInit {
     })
   }
 
-  editTicket(ticket: TicketModel) {
-    // TODO
-  }
-
   navigateToTicketDetails(ticket: TicketModel) {
     this.router.navigate(["tickets", ticket.id]);
+  }
+
+  openAddTicketDialog() {
+    this.ticketFormContainer.clear();
+    const formComponent = this.ticketFormContainer.createComponent(
+      TicketFormComponent
+    );
+
+    const instance = formComponent.instance;
+    instance.formSubmit.pipe(takeUntil(this.destroyed$)).subscribe((formValue: TicketFormValue) => {
+      this.createTicket(formValue);
+    })
+    instance.cancel.pipe(takeUntil(this.destroyed$)).subscribe(() => this.displayTicketForm = false)
+
+    this.displayTicketForm = true;
+  }
+
+  createTicket(ticket: CreateTicketRequest) {
+    this.service.create(ticket).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          detail: this.translateService.instant('ticket.create.success')
+        });
+        this.refreshView();
+        this.displayTicketForm = false;
+      },
+      error: (err) => this.messageService.add({
+        severity: 'error',
+        summary: this.translateService.instant('general.error'),
+        detail: err.error
+      }),
+    })
+  }
+
+  openEditTicketDialog(ticket: TicketModel) {
+    this.ticketFormContainer.clear();
+    const formComponent = this.ticketFormContainer.createComponent(
+      TicketFormComponent
+    );
+
+    const instance = formComponent.instance;
+    instance.ticket = ticket;
+    instance.formSubmit.pipe(takeUntil(this.destroyed$)).subscribe((formValue: TicketFormValue) => {
+      this.editTicket(ticket.id, formValue);
+    })
+    instance.cancel.pipe(takeUntil(this.destroyed$)).subscribe(() => this.displayTicketForm = false)
+
+    this.displayTicketForm = true;
+  }
+
+  editTicket(ticketId: number, ticket: ModifyTicketRequest) {
+    this.service.modify(ticketId, ticket).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          detail: this.translateService.instant('ticket.edit.success')
+        });
+        this.refreshView();
+        this.displayTicketForm = false;
+      },
+      error: (err) => this.messageService.add({
+        severity: 'error',
+        summary: this.translateService.instant('general.error'),
+        detail: err.error
+      }),
+    })
   }
 }

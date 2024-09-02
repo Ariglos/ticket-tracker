@@ -5,10 +5,12 @@ export interface TicketModel {
   id: number;
 
   employee: string;
+  employeeId: number;
   company: string;
   employeePhoneNo: string;
   signature: string;
   offence: string;
+  offenceId: number;
 
   fineAmount: number;
   administrationFee: number;

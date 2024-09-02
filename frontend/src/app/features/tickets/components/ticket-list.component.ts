@@ -204,6 +204,7 @@ import {TooltipModule} from "primeng/tooltip";
                 </div>
                 <div>
                   <p-button
+                    [disabled]="ticket.status === 'PAID'"
                     size="small"
                     icon="pi pi-pencil"
                     pTooltip="{{'action.edit' | translate}}"

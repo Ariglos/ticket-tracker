@@ -11,7 +11,7 @@ export interface ModifyTicketRequest {
   dueDate: string;
 
   customOffence: string;
-  offenceId: string;
+  offenceId: number;
 
   employeeId: number;
 }

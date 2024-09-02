@@ -1,4 +1,4 @@
-package pl.ariglos.tickettracker.tickets.services;
+package pl.ariglos.tickettracker.tickets.services.implementations;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -16,6 +16,7 @@ import pl.ariglos.tickettracker.employees.domain.Employee;
 import pl.ariglos.tickettracker.tickets.domain.Offence;
 import pl.ariglos.tickettracker.tickets.domain.Ticket;
 import pl.ariglos.tickettracker.tickets.queries.BrowseTickets;
+import pl.ariglos.tickettracker.tickets.services.TicketSpecificationService;
 
 @Service
 public class TicketSpecificationServiceImpl implements TicketSpecificationService {

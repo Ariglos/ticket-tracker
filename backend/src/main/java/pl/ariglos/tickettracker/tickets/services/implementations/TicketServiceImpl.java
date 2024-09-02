@@ -1,7 +1,6 @@
-package pl.ariglos.tickettracker.tickets.services;
+package pl.ariglos.tickettracker.tickets.services.implementations;
 
 import java.math.BigDecimal;
-import java.util.Base64;
 import java.util.Optional;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataAccessException;
@@ -26,11 +25,15 @@ import pl.ariglos.tickettracker.tickets.queries.BrowseTickets;
 import pl.ariglos.tickettracker.tickets.repositories.AttachmentRepository;
 import pl.ariglos.tickettracker.tickets.repositories.OffenceRepository;
 import pl.ariglos.tickettracker.tickets.repositories.TicketRepository;
+import pl.ariglos.tickettracker.tickets.services.TicketMailService;
+import pl.ariglos.tickettracker.tickets.services.TicketService;
+import pl.ariglos.tickettracker.tickets.services.TicketSpecificationService;
 
 @Service
 public class TicketServiceImpl implements TicketService {
 
   private final TicketSpecificationService ticketSpecificationService;
+  private final TicketMailService ticketMailService;
   private final TicketRepository ticketRepository;
   private final EmployeeRepository employeeRepository;
   private final OffenceRepository offenceRepository;
@@ -39,13 +42,16 @@ public class TicketServiceImpl implements TicketService {
   private final LanguageController languageController;
 
   public TicketServiceImpl(
-          TicketSpecificationService ticketSpecificationService,
-          TicketRepository ticketRepository,
-          EmployeeRepository employeeRepository,
-          OffenceRepository offenceRepository,
-          AttachmentRepository attachmentRepository, ConversionService conversionService,
-          LanguageController languageController) {
+      TicketSpecificationService ticketSpecificationService,
+      TicketMailService ticketMailService,
+      TicketRepository ticketRepository,
+      EmployeeRepository employeeRepository,
+      OffenceRepository offenceRepository,
+      AttachmentRepository attachmentRepository,
+      ConversionService conversionService,
+      LanguageController languageController) {
     this.ticketSpecificationService = ticketSpecificationService;
+    this.ticketMailService = ticketMailService;
     this.ticketRepository = ticketRepository;
     this.employeeRepository = employeeRepository;
     this.offenceRepository = offenceRepository;
@@ -104,6 +110,9 @@ public class TicketServiceImpl implements TicketService {
     try {
       Ticket savedTicket = ticketRepository.save(ticket);
       savedTicketDto = conversionService.convert(savedTicket, TicketDto.class);
+
+      ticketMailService.notifyEmployeeAboutTicket(
+          savedTicket.getId(), savedTicket.getSignature(), savedTicket.getDueDate(), savedTicket.getFineAmount(), savedTicket.getCurrency());
     } catch (DataAccessException e) {
       String errorCode = "EXC_010";
       String message = languageController.get(errorCode);
@@ -133,7 +142,8 @@ public class TicketServiceImpl implements TicketService {
     Offence offence = findOffenceById(modifyTicketItem.getOffenceId());
     Employee employee = findEmployeeById(modifyTicketItem.getEmployeeId());
 
-    Ticket ticketToModify = ticketById.toBuilder()
+    Ticket ticketToModify =
+        ticketById.toBuilder()
             .signature(modifyTicketItem.getSignature())
             .fineAmount(modifyTicketItem.getFineAmount())
             .currency(modifyTicketItem.getCurrency())

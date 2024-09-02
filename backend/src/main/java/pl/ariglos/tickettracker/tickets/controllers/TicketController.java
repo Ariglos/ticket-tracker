@@ -13,6 +13,7 @@ import pl.ariglos.tickettracker.tickets.services.TicketService;
 
 import java.util.Base64;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/tickets")
 public class TicketController {

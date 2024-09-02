@@ -16,10 +16,12 @@ public class TicketDto {
     private long id;
 
     private String employee;
+    private Long employeeId;
     private String company;
     private String employeePhoneNo;
     private String signature;
     private String offence;
+    private Long offenceId;
 
     private BigDecimal fineAmount;
     private BigDecimal administrationFee;

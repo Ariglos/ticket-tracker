@@ -1,5 +1,6 @@
 package pl.ariglos.tickettracker.tickets.converters;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import pl.ariglos.tickettracker.common.converters.AutoRegisteringConverter;
 import pl.ariglos.tickettracker.employees.domain.Company;
@@ -20,7 +21,8 @@ public class TicketDtoConverter extends AutoRegisteringConverter<Ticket, TicketD
     String employeeFullName = employee.getName() + " " + employee.getSurname();
 
     String offenceDescription;
-    if (source.getCustomOffence() != null) {
+    Long offenceId = offence != null ? offence.getId() : null;
+    if (StringUtils.isNotBlank(source.getCustomOffence())) {
       offenceDescription = source.getCustomOffence();
     } else {
       offenceDescription = offence != null ? offence.getDescription() : "";
@@ -29,10 +31,12 @@ public class TicketDtoConverter extends AutoRegisteringConverter<Ticket, TicketD
     return TicketDto.builder()
         .id(source.getId())
         .employee(employeeFullName)
+        .employeeId(employee.getId())
         .company(company.getName())
         .employeePhoneNo(employee.getPhoneNo())
         .signature(source.getSignature())
         .offence(offenceDescription)
+        .offenceId(offenceId)
         .fineAmount(source.getFineAmount())
         .administrationFee(source.getAdministrationFee())
         .currency(source.getCurrency())

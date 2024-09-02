@@ -40,12 +40,14 @@ import {ModifyTicketRequest} from "../models/modify-ticket.request";
   ],
   template: `
     <p-toast/>
-    <p-button
-      severity="success"
-      icon="pi pi-plus"
-      label="{{'ticket.add' | translate}}"
-      (onClick)="openAddTicketDialog()"
-    />
+    <div style="margin: 16px 0">
+      <p-button
+        severity="success"
+        icon="pi pi-plus"
+        label="{{'ticket.add' | translate}}"
+        (onClick)="openAddTicketDialog()"
+      />
+    </div>
     <app-ticket-list [data]="tickets$ | async" [query]="query" [companies]="companies$ | async"
                      [employees]="employees$ | async" [offences]="offences$ | async" (reloadData)="reloadData($event)"
                      (confirm)="confirmTicket($event)" (delete)="deleteTicket($event)"

@@ -77,30 +77,34 @@ import {TooltipModule} from "primeng/tooltip";
           </tr>
           <tr>
             <th>
-              <input
-                class="w-full"
-                pInputText
-                placeholder="{{'ticket.name' | translate}}"
-                (input)="onFilter('name', $any($event.target).value)"
-              />
-              <input
-                class="w-full"
-                pInputText
-                placeholder="{{'ticket.surname' | translate}}"
-                (input)="onFilter('surname', $any($event.target).value)"
-              />
+              <div class="flex-container">
+                <input
+                  [style.width]="'8rem'"
+                  class="w-full"
+                  pInputText
+                  placeholder="{{'ticket.name' | translate}}"
+                  (input)="onFilter('name', $any($event.target).value)"
+                />
+                <input
+                  [style.width]="'8rem'"
+                  class="w-full"
+                  pInputText
+                  placeholder="{{'ticket.surname' | translate}}"
+                  (input)="onFilter('surname', $any($event.target).value)"
+                /></div>
             </th>
             <th>
               <p-dropdown
                 appendTo="body"
                 [options]="companyOptions"
-                placeholder="Wybierz spółkę"
+                placeholder="Spółka"
                 [showClear]="true"
                 (onChange)="onFilter('companyId', $event.value)"
               />
             </th>
             <th>
               <input
+                [style.width]="'8rem'"
                 class="w-full"
                 pInputText
                 placeholder="{{'ticket.phone-no' | translate}}"
@@ -109,6 +113,7 @@ import {TooltipModule} from "primeng/tooltip";
             </th>
             <th>
               <input
+                [style.width]="'8rem'"
                 class="w-full"
                 pInputText
                 placeholder="{{'ticket.signature' | translate}}"
@@ -129,19 +134,21 @@ import {TooltipModule} from "primeng/tooltip";
               <p-dropdown
                 appendTo="body"
                 [options]="offenceOptions"
-                placeholder="Wybierz przewinienie"
+                placeholder="Przewinienie"
                 [showClear]="true"
                 (onChange)="onFilter('offenceId', $event.value)"
               />
             </th>
             <th colspan="2">
-              <p-dropdown
-                appendTo="body"
-                [options]="currencyOptions"
-                placeholder="Wybierz walutę"
-                [showClear]="true"
-                (onChange)="onFilter('currency', $event.value)"
-              />
+              <div class="charges">
+                <p-dropdown
+                  appendTo="body"
+                  [options]="currencyOptions"
+                  placeholder="Waluta"
+                  [showClear]="true"
+                  (onChange)="onFilter('currency', $event.value)"
+                />
+              </div>
             </th>
             <th>
               <p-calendar
@@ -157,7 +164,7 @@ import {TooltipModule} from "primeng/tooltip";
               <p-dropdown
                 appendTo="body"
                 [options]="statusOptions"
-                placeholder="Wybierz status"
+                placeholder="Status"
                 [showClear]="true"
                 (onChange)="onFilter('status', $event.value)"
               />
@@ -179,12 +186,13 @@ import {TooltipModule} from "primeng/tooltip";
             <td [class]="'status ' + ticket.status | lowercase">{{ ('ticket.status.' + ticket.status) | translate }}
             </td>
             <td>
-              <div>
-                <div>
+              <div class="flex-col-container">
+                <div class="btn-container">
                   <p-button
                     size="small"
                     icon="pi pi-search"
                     pTooltip="{{'action.display-attachment' | translate}}"
+                    tooltipPosition="left"
                     (onClick)="displayAttachment.emit(ticket)"
                   />
                   <p-button
@@ -192,6 +200,7 @@ import {TooltipModule} from "primeng/tooltip";
                     icon="pi pi-sign-in"
                     severity="secondary"
                     pTooltip="{{'action.go-to-details' | translate}}"
+                    tooltipPosition="left"
                     (onClick)="navigate.emit(ticket)"
                   />
                   <p-button
@@ -199,15 +208,17 @@ import {TooltipModule} from "primeng/tooltip";
                     icon="pi pi-times"
                     severity="danger"
                     pTooltip="{{'action.delete-attachment' | translate}}"
+                    tooltipPosition="left"
                     (onClick)="deleteAttachment.emit(ticket)"
                   />
                 </div>
-                <div>
+                <div class="btn-container">
                   <p-button
                     [disabled]="ticket.status === 'PAID'"
                     size="small"
                     icon="pi pi-pencil"
                     pTooltip="{{'action.edit' | translate}}"
+                    tooltipPosition="left"
                     (onClick)="edit.emit(ticket)"
                   />
                   <p-button
@@ -216,6 +227,7 @@ import {TooltipModule} from "primeng/tooltip";
                     icon="pi pi-check"
                     severity="success"
                     pTooltip="{{'action.confirm' | translate}}"
+                    tooltipPosition="left"
                     (onClick)="confirm.emit(ticket)"
                   />
                   <p-button
@@ -224,6 +236,7 @@ import {TooltipModule} from "primeng/tooltip";
                     icon="pi pi-trash"
                     severity="danger"
                     pTooltip="{{'action.delete' | translate}}"
+                    tooltipPosition="left"
                     (onClick)="delete.emit(ticket)"
                   />
                 </div>
@@ -236,8 +249,14 @@ import {TooltipModule} from "primeng/tooltip";
   `,
   styles: `
 
-    th, td {
-      font-size: 16px;
+    th {
+      font-size: 14px;
+      padding: 12px !important;
+    }
+
+    td {
+      font-size: 14px;
+      padding: 0 !important;
     }
 
     td.status {
@@ -250,6 +269,27 @@ import {TooltipModule} from "primeng/tooltip";
 
     td.paid {
       color: green;
+    }
+
+    .flex-container {
+      display: flex;
+      gap: 4px;
+    }
+
+    .flex-col-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .btn-container {
+      display: flex;
+      gap: 2px;
+    }
+
+    .charges {
+      display: flex;
+      justify-content: center;
     }
 
   `

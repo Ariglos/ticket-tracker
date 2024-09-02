@@ -170,6 +170,27 @@ public class TicketServiceImpl implements TicketService {
     }
   }
 
+  @Override
+  public void confirmTicket(Long id) throws TicketTrackerException {
+    Ticket ticketToConfirm = retrieveTicketById(id);
+
+    if (ticketToConfirm.getStatus().equals(TicketStatus.PAID)) {
+      String errorCode = "EXC_015";
+      String message = languageController.get(errorCode);
+      throw new TicketTrackerException(errorCode, message);
+    }
+
+    ticketToConfirm.setStatus(TicketStatus.PAID);
+
+    try {
+      ticketRepository.save(ticketToConfirm);
+    } catch (DataAccessException e) {
+      String errorCode = "EXC_016";
+      String message = languageController.get(errorCode);
+      throw new TicketTrackerException(errorCode, message);
+    }
+  }
+
   private Ticket retrieveTicketById(Long id) throws TicketTrackerException {
     if (id == null) {
       String errorCode = "EXC_005";

@@ -18,4 +18,6 @@ public interface TicketService {
   TicketDto modifyTicket(Long id, ModifyTicketItem modifyTicketItem) throws TicketTrackerException;
 
   void deleteTicket(Long id) throws TicketTrackerException;
+
+  void confirmTicket(Long id) throws TicketTrackerException;
 }

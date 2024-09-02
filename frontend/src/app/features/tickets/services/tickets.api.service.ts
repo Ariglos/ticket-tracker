@@ -6,6 +6,7 @@ import {PageResult} from "../../../shared/api/page-result";
 import {TicketModel} from "../models/ticket.model";
 import {CreateTicketRequest} from "../models/create-ticket.request";
 import {ModifyTicketRequest} from "../models/modify-ticket.request";
+import {tap} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +43,16 @@ export class TicketsApiService {
   }
 
   getAttachment(ticketId: number) {
-    return this.http.get(`${this.URL}/${ticketId}/attachments`);
+    return this.http.get(`${this.URL}/${ticketId}/attachments`, {
+      responseType: 'blob'
+    }).pipe(
+      tap((pdfBlob: Blob) => {
+        if (pdfBlob != null) {
+          const fileURL = URL.createObjectURL(pdfBlob);
+          window.open(fileURL);
+        }
+      })
+    );
   }
 
   deleteAttachments(ticketId: number) {

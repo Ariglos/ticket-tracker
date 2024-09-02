@@ -1,5 +1,7 @@
 {
+  "general.error": "Wystąpił błąd",
   "choose.company": "Wybierz spółkę",
+  "choose.date": "Wybierz datę",
   "ticket.full-name": "Imię i nazwisko",
   "ticket.name": "Imię",
   "ticket.surname": "Nazwisko",
@@ -13,5 +15,16 @@
   "ticket.due-date": "Termin płatności",
   "ticket.status": "Status",
   "ticket.status.PENDING": "Do zapłaty",
-  "ticket.status.PAID": "Opłacony"
+  "ticket.status.PAID": "Opłacony",
+  "ticket.actions": "Akcje",
+  "ticket.confirm.success": "Potwierdzono płatność mandatu",
+  "ticket.delete.success": "Usunięto mandat",
+  "ticket.attachment.delete.success": "Usunięto załącznik",
+  "action.edit": "Edytuj",
+  "action.confirm": "Potwierdź",
+  "action.delete": "Usuń",
+  "action.display-attachment": "Wyświetl załącznik",
+  "action.display-attachment.error": "Nie znaleziono załącznika",
+  "action.delete-attachment": "Usuń załącznik",
+  "action.go-to-details": "Przejdź do szczegółów"
 }

@@ -6,7 +6,7 @@ import {TicketModel} from "../models/ticket.model";
 import {TranslateModule} from "@ngx-translate/core";
 import {JsonPipe, LowerCasePipe} from "@angular/common";
 import {BrowseTickets} from "../queries/browse-tickets";
-import {debounceTime, map, of, Subject, takeUntil} from "rxjs";
+import {debounceTime, map, Subject, takeUntil} from "rxjs";
 import {DestroyedDirective} from "../../../utils/directives/destroyed.directive";
 import {InputTextModule} from "primeng/inputtext";
 import {CompanyModel} from "../../employees/models/company.model";
@@ -17,6 +17,7 @@ import {OffenceModel} from "../models/offence.model";
 import {InputNumberModule} from "primeng/inputnumber";
 import {Currency, CURRENCY} from "../enums/currency.enum";
 import {TICKET_STATUS, TicketStatus} from "../enums/ticket-status.enum";
+import {TooltipModule} from "primeng/tooltip";
 
 @Component({
   selector: 'app-ticket-list',
@@ -31,7 +32,8 @@ import {TICKET_STATUS, TicketStatus} from "../enums/ticket-status.enum";
     InputTextModule,
     DropdownModule,
     CalendarModule,
-    InputNumberModule
+    InputNumberModule,
+    TooltipModule
   ],
   template: `
     @if (_data) {
@@ -71,6 +73,7 @@ import {TICKET_STATUS, TicketStatus} from "../enums/ticket-status.enum";
             <th pSortableColumn="status">{{ 'ticket.status' | translate }}
               <p-sortIcon field="status"/>
             </th>
+            <th>{{ 'ticket.actions' | translate }}</th>
           </tr>
           <tr>
             <th>
@@ -88,13 +91,13 @@ import {TICKET_STATUS, TicketStatus} from "../enums/ticket-status.enum";
               />
             </th>
             <th>
-                <p-dropdown
+              <p-dropdown
                 appendTo="body"
                 [options]="companyOptions"
                 placeholder="Wybierz spółkę"
                 [showClear]="true"
                 (onChange)="onFilter('companyId', $event.value)"
-                />
+              />
             </th>
             <th>
               <input
@@ -117,6 +120,7 @@ import {TICKET_STATUS, TicketStatus} from "../enums/ticket-status.enum";
                 appendTo="body"
                 [showIcon]="true"
                 [showClear]="true"
+                placeholder="{{'choose.date' | translate}}"
                 (onSelect)="onFilter('offenceDate', $event)"
                 (onClear)="onFilter('offenceDate', null)"
               />
@@ -144,6 +148,7 @@ import {TICKET_STATUS, TicketStatus} from "../enums/ticket-status.enum";
                 appendTo="body"
                 [showIcon]="true"
                 [showClear]="true"
+                placeholder="{{'choose.date' | translate}}"
                 (onSelect)="onFilter('dueDate', $event)"
                 (onClear)="onFilter('dueDate', null)"
               />
@@ -157,6 +162,7 @@ import {TICKET_STATUS, TicketStatus} from "../enums/ticket-status.enum";
                 (onChange)="onFilter('status', $event.value)"
               />
             </th>
+            <th></th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-ticket>
@@ -171,6 +177,56 @@ import {TICKET_STATUS, TicketStatus} from "../enums/ticket-status.enum";
             <td>{{ ticket.administrationFee }} {{ ticket.currency }}</td>
             <td>{{ ticket.dueDate }}</td>
             <td [class]="'status ' + ticket.status | lowercase">{{ ('ticket.status.' + ticket.status) | translate }}
+            </td>
+            <td>
+              <div>
+                <div>
+                  <p-button
+                    size="small"
+                    icon="pi pi-search"
+                    pTooltip="{{'action.display-attachment' | translate}}"
+                    (onClick)="displayAttachment.emit(ticket)"
+                  />
+                  <p-button
+                    size="small"
+                    icon="pi pi-sign-in"
+                    severity="secondary"
+                    pTooltip="{{'action.go-to-details' | translate}}"
+                    (onClick)="navigate.emit(ticket)"
+                  />
+                  <p-button
+                    size="small"
+                    icon="pi pi-times"
+                    severity="danger"
+                    pTooltip="{{'action.delete-attachment' | translate}}"
+                    (onClick)="deleteAttachment.emit(ticket)"
+                  />
+                </div>
+                <div>
+                  <p-button
+                    size="small"
+                    icon="pi pi-pencil"
+                    pTooltip="{{'action.edit' | translate}}"
+                    (onClick)="edit.emit(ticket)"
+                  />
+                  <p-button
+                    [disabled]="ticket.status === 'PAID'"
+                    size="small"
+                    icon="pi pi-check"
+                    severity="success"
+                    pTooltip="{{'action.confirm' | translate}}"
+                    (onClick)="confirm.emit(ticket)"
+                  />
+                  <p-button
+                    [disabled]="ticket.status === 'PAID'"
+                    size="small"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    pTooltip="{{'action.delete' | translate}}"
+                    (onClick)="delete.emit(ticket)"
+                  />
+                </div>
+              </div>
             </td>
           </tr>
         </ng-template>
@@ -236,6 +292,7 @@ export class TicketListComponent implements OnInit {
   @Output() confirm = new EventEmitter<TicketModel>;
   @Output() deleteAttachment = new EventEmitter<TicketModel>;
   @Output() displayAttachment = new EventEmitter<TicketModel>;
+  @Output() navigate = new EventEmitter<TicketModel>;
 
   private destroyed$ = inject(DestroyedDirective).destroyed$;
   filterSubject = new Subject<{ fieldName: string; value: any }>();
@@ -243,8 +300,8 @@ export class TicketListComponent implements OnInit {
   companyOptions: { label: string, value: number }[];
   employeeOptions: { label: string, value: number }[];
   offenceOptions: { label: string, value: number }[];
-  currencyOptions: {label: string, value: Currency}[];
-  statusOptions: {label: string, value: TicketStatus}[];
+  currencyOptions: { label: string, value: Currency }[];
+  statusOptions: { label: string, value: TicketStatus }[];
 
   first = 0;
   rows = 10;

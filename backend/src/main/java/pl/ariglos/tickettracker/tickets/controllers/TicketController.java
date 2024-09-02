@@ -1,14 +1,17 @@
 package pl.ariglos.tickettracker.tickets.controllers;
 
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import pl.ariglos.tickettracker.common.api.exceptions.TicketTrackerException;
+import pl.ariglos.tickettracker.tickets.domain.Attachment;
 import pl.ariglos.tickettracker.tickets.dto.CreateTicketItem;
 import pl.ariglos.tickettracker.tickets.dto.ModifyTicketItem;
 import pl.ariglos.tickettracker.tickets.dto.TicketDto;
 import pl.ariglos.tickettracker.tickets.queries.BrowseTickets;
 import pl.ariglos.tickettracker.tickets.services.TicketService;
+
+import java.util.Base64;
 
 @RestController
 @RequestMapping("/tickets")
@@ -63,6 +66,19 @@ public class TicketController {
     ticketService.confirmTicket(id);
 
     return ResponseEntity.ok().build();
+  }
+
+  @GetMapping("/{id}/attachments")
+  public ResponseEntity<?> getAttachment(@PathVariable Long id) throws TicketTrackerException {
+    Attachment attachment = ticketService.getAttachment(id);
+
+    byte[] attachmentBytes = Base64.getDecoder().decode(attachment.getData());
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_PDF);
+    headers.setContentDisposition(ContentDisposition.inline().filename(attachment.getFileName()).build());
+
+    return new ResponseEntity<>(attachmentBytes, headers, HttpStatus.OK);
   }
 
   @DeleteMapping("/{id}/attachments")

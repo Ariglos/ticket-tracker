@@ -2,6 +2,7 @@ package pl.ariglos.tickettracker.tickets.services;
 
 import org.springframework.data.domain.Page;
 import pl.ariglos.tickettracker.common.api.exceptions.TicketTrackerException;
+import pl.ariglos.tickettracker.tickets.domain.Attachment;
 import pl.ariglos.tickettracker.tickets.dto.ModifyTicketItem;
 import pl.ariglos.tickettracker.tickets.dto.TicketDto;
 import pl.ariglos.tickettracker.tickets.dto.CreateTicketItem;
@@ -20,6 +21,8 @@ public interface TicketService {
   void deleteTicket(Long id) throws TicketTrackerException;
 
   void confirmTicket(Long id) throws TicketTrackerException;
+
+  Attachment getAttachment(Long ticketId) throws TicketTrackerException;
 
   void deleteAttachment(Long ticketId) throws TicketTrackerException;
 }

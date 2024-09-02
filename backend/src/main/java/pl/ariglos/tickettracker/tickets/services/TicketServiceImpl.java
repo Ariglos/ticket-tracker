@@ -1,6 +1,7 @@
 package pl.ariglos.tickettracker.tickets.services;
 
 import java.math.BigDecimal;
+import java.util.Base64;
 import java.util.Optional;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataAccessException;
@@ -193,6 +194,21 @@ public class TicketServiceImpl implements TicketService {
       String message = languageController.get(errorCode);
       throw new TicketTrackerException(errorCode, message);
     }
+  }
+
+  @Override
+  public Attachment getAttachment(Long ticketId) throws TicketTrackerException {
+    Ticket ticket = retrieveTicketById(ticketId);
+
+    Attachment attachment = ticket.getAttachment();
+
+    if (attachment == null) {
+      String errorCode = "EXC_018";
+      String message = languageController.get(errorCode);
+      throw new TicketTrackerException(errorCode, message);
+    }
+
+    return attachment;
   }
 
   @Override

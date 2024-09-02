@@ -32,7 +32,12 @@ public class BaseControllerAdvice {
     }
 
     private HttpStatus resolveHttpStatus(String errorCode) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        HttpStatus status = switch (errorCode) {
+            case "EXC_005" -> HttpStatus.BAD_REQUEST;
+            case "EXC_006", "EXC_008", "EXC_009", "EXC_018" -> HttpStatus.NOT_FOUND;
+            case "EXC_007", "EXC_012", "EXC_013", "EXC_015" -> HttpStatus.UNPROCESSABLE_ENTITY;
+            default -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
 
         return status;
     }

@@ -30,7 +30,7 @@ public class EmailServiceImpl implements EmailService {
         } catch (MailException e) {
             String errorCode = "EXC_019";
             String message = languageController.get(errorCode);
-            throw new TicketTrackerException(errorCode, message);
+            throw new RuntimeException(message);
         }
     }
 }

@@ -98,6 +98,7 @@ public class TicketServiceImpl implements TicketService {
   }
 
   @Override
+  @Transactional
   public TicketDto createTicket(CreateTicketItem createTicketItem) throws TicketTrackerException {
     TicketDto savedTicketDto;
 
